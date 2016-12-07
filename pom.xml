@@ -145,6 +145,7 @@
         </resources>
 
         <plugins>
+
             <plugin>
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <version>2.17</version>
@@ -161,6 +162,7 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>2.10</version>
@@ -177,6 +179,7 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.0.2</version>
@@ -192,6 +195,7 @@
                     </archive>
                 </configuration>
             </plugin>
+
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.5.1</version>
@@ -201,6 +205,7 @@
                     <compilerArgument>-Xlint:unchecked</compilerArgument>
                 </configuration>
             </plugin>
+
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.6</version>
@@ -229,6 +234,7 @@
     
     <reporting>
         <plugins>
+
             <plugin>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
                 <version>2.9</version>
@@ -236,19 +242,23 @@
                     <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
                 </configuration>
             </plugin>
+
             <plugin>
                 <artifactId>maven-jxr-plugin</artifactId>
                 <version>2.5</version>
             </plugin>
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>findbugs-maven-plugin</artifactId>
                 <version>3.0.4</version>
             </plugin>
+
             <plugin>
                 <artifactId>maven-pmd-plugin</artifactId>
                 <version>3.6</version>
             </plugin>
+
         </plugins>
     </reporting>
 
