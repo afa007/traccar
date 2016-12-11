@@ -16,7 +16,11 @@
  */
 package org.traccar.reports;
 
+import javafx.geometry.Pos;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.traccar.Context;
+import org.traccar.helper.DateUtil;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
@@ -24,6 +28,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 public final class ReportUtils {
 
@@ -33,7 +39,7 @@ public final class ReportUtils {
     public static String getDistanceUnit(long userId) {
         String unit = Context.getPermissionsManager().getUser(userId).getDistanceUnit();
         if (unit == null) {
-            unit  = Context.getPermissionsManager().getServer().getDistanceUnit();
+            unit = Context.getPermissionsManager().getServer().getDistanceUnit();
         }
         return unit != null ? unit : "km";
     }
@@ -41,7 +47,7 @@ public final class ReportUtils {
     public static String getSpeedUnit(long userId) {
         String unit = Context.getPermissionsManager().getUser(userId).getSpeedUnit();
         if (unit == null) {
-            unit  = Context.getPermissionsManager().getServer().getSpeedUnit();
+            unit = Context.getPermissionsManager().getServer().getSpeedUnit();
         }
         return unit != null ? unit : "kn";
     }
@@ -99,6 +105,41 @@ public final class ReportUtils {
             }
         }
         return "-";
+    }
+
+    public static List<Position> getPositionList(String json) {
+
+        List<Position> list = new ArrayList<>();
+
+        JSONArray positions = new JSONArray(json);
+        double lastLatitude = 0.0;
+        double lastLongitude = 0.0;
+        Date lastFixTime = new Date();
+        for (int i = 0; i < positions.length(); i++) {
+
+            Position pos = new Position();
+
+            JSONObject info = positions.getJSONObject(i);
+
+            // id
+            pos.setId(info.getInt("id"));
+            pos.setDeviceId(info.getLong("deviceId"));
+            pos.setFixTime(DateUtil.parseDate(info.getString("fixTime")));
+            pos.setLatitude(info.getDouble("latitude"));
+            pos.setLongitude(info.getDouble("longitude"));
+
+            JSONObject attributes = info.getJSONObject("attributes");
+            pos.set(Position.KEY_TOTAL_DISTANCE, attributes.getDouble("totalDistance"));
+
+            if (pos.getFixTime().compareTo(lastFixTime) != 0) {
+                list.add(pos);
+                lastLatitude = pos.getLatitude();
+                lastLongitude = pos.getLongitude();
+                lastFixTime = pos.getFixTime();
+            }
+        }
+
+        return list;
     }
 
 }

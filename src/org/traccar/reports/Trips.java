@@ -34,6 +34,8 @@ import org.jxls.transform.Transformer;
 import org.jxls.transform.poi.PoiTransformer;
 import org.jxls.util.TransformerFactory;
 import org.traccar.Context;
+import org.traccar.mining.DataNode;
+import org.traccar.mining.OutlierNodeDetect;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.model.Position;
@@ -45,7 +47,7 @@ public final class Trips {
     private Trips() {
     }
 
-    private static TripReport calculateTrip(ArrayList<Position> positions, int startIndex, int endIndex) {
+    private static TripReport calculateTrip(List<Position> positions, int startIndex, int endIndex) {
         Position startTrip = positions.get(startIndex);
         Position endTrip = positions.get(endIndex);
 
@@ -87,6 +89,90 @@ public final class Trips {
         trip.setSpentFuel(ReportUtils.calculateFuel(startTrip, endTrip));
 
         return trip;
+    }
+
+    private static Collection<TripReport> detectTripsByTimeDistance(long deviceId, Date from, Date to) throws SQLException {
+
+        ArrayList<Position> positions = new ArrayList<>(Context.getDataManager().getPositions(deviceId, from, to));
+
+        return getTripsByBetween(positions);
+    }
+
+
+    public static Collection<TripReport> getTripsByBetween(List<Position> positions) {
+        Collection<TripReport> result = new ArrayList<>();
+
+        if (positions != null && !positions.isEmpty() && positions.size() >= 2) {
+
+            int startIndex = 0, endIndex = 1;
+            for (int i = 0; i < positions.size() - 1; i++) {
+
+                double tripDuration = (positions.get(i + 1).getFixTime().getTime()
+                        - positions.get(i).getFixTime().getTime()) / 1000;
+
+                double tripDistance = (ReportUtils.calculateDistance(positions.get(i),
+                        positions.get(i + 1), false));
+
+                if (tripDuration > 30 * 60 && tripDistance > 1000 * 5) {
+
+                    endIndex = i;
+                    result.add(calculateTrip(positions, startIndex, endIndex));
+                    startIndex = i + 1;
+                }
+                System.out.println("i:" + i + ", tripDuration:" + tripDuration + ", tripDistance:" + tripDistance);
+            }
+
+        }
+
+        return result;
+    }
+
+    public static Collection<TripReport> getTrips(List<Position> positions) {
+        Collection<TripReport> result = new ArrayList<>();
+
+        if (positions != null && !positions.isEmpty() && positions.size() >= 2) {
+
+            List<Double> durationList = new ArrayList<>();
+            List<Double> distanceList = new ArrayList<>();
+
+            for (int i = 0; i < positions.size() - 1; i++) {
+                double tripDuration = (positions.get(i + 1).getFixTime().getTime()
+                        - positions.get(i).getFixTime().getTime()) / 1000;
+                double tripDistance = (ReportUtils.calculateDistance(positions.get(i),
+                        positions.get(i + 1), false));
+//                if (tripDuration == 0.0 && tripDistance == 0.0) {
+//                    continue;
+//                }
+                durationList.add(tripDuration);
+                distanceList.add(tripDistance);
+                System.out.println("i:" + i + ", tripDuration:" + tripDuration + ", tripDistance:" + tripDistance);
+            }
+
+            // 检测离异点
+            OutlierNodeDetect lof = new OutlierNodeDetect();
+            List<DataNode> nodeList = lof.detect2Dimention(durationList, distanceList);
+            for (DataNode node : nodeList) {
+                if (node.getLof() > 1) {
+                    durationList.set(Integer.parseInt(node.getNodeName()), null);
+                }
+            }
+
+//            int startIndex = 0;
+//            int endIndex = 0;
+//            for (int i = 0; i < durationList.size(); i++) {
+//                if (durationList.get(i) == null) {
+////                    result.add(calculateTrip(positions, startIndex, endIndex));
+//                    startIndex = endIndex = i + 1;
+//                } else {
+//                    endIndex++;
+//                }
+//            }
+//            if (startIndex != endIndex) {
+////                result.add(calculateTrip(positions, startIndex, endIndex));
+//            }
+        }
+
+        return result;
     }
 
     private static Collection<TripReport> detectTrips(long deviceId, Date from, Date to) throws SQLException {
@@ -164,21 +250,22 @@ public final class Trips {
     }
 
     public static Collection<TripReport> getObjects(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
-            Date from, Date to) throws SQLException {
+                                                    Date from, Date to) throws SQLException {
         ArrayList<TripReport> result = new ArrayList<>();
-        for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
+        for (long deviceId : ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            result.addAll(detectTrips(deviceId, from, to));
+//            result.addAll(detectTrips(deviceId, from, to));
+            result.addAll(detectTripsByTimeDistance(deviceId, from, to));
         }
         return result;
     }
 
     public static void getExcel(OutputStream outputStream,
-            long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
-            Date from, Date to) throws SQLException, IOException {
+                                long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
+                                Date from, Date to) throws SQLException, IOException {
         ArrayList<DeviceReport> devicesTrips = new ArrayList<>();
         ArrayList<String> sheetNames = new ArrayList<>();
-        for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
+        for (long deviceId : ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
             Collection<TripReport> trips = detectTrips(deviceId, from, to);
             DeviceReport deviceTrips = new DeviceReport();

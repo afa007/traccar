@@ -109,7 +109,7 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
                     position.setLatitude(Double.parseDouble(location[0]));
                     position.setLongitude(Double.parseDouble(location[1]));
                     break;
-                case "speed":
+              case "speed"  :
                     position.setSpeed(Double.parseDouble(value));
                     break;
                 case "bearing":
