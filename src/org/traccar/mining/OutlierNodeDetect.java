@@ -11,7 +11,7 @@ import java.util.List;
 public class OutlierNodeDetect {
 
     // 正整数K
-    private static int INT_K = 5;
+    private static final int INT_K = 5;
 
     /**
      * 1.找到给定点与其他点的欧几里得距离
@@ -192,14 +192,14 @@ public class OutlierNodeDetect {
      * n维欧氏空间是一个点集,它的每个点可以表示为(x(1),x(2),...x(n)),
      * 其中x(i)(i=1,2...n)是实数,称为x的第i个坐标,两个点x和y=(y(1),y(2)...y(n))之间的距离d(x,y)定义为上面的公式.
      *
-     * @param A
-     * @param B
+     * @param a
+     * @param b
      * @return
      */
-    private double getDis(DataNode A, DataNode B) {
+    private double getDis(DataNode a, DataNode b) {
         double dis = 0.0;
-        double[] dimA = A.getDimensioin();
-        double[] dimB = B.getDimensioin();
+        double[] dimA = a.getDimensioin();
+        double[] dimB = b.getDimensioin();
         if (dimA.length == dimB.length) {
             for (int i = 0; i < dimA.length; i++) {
                 double temp = Math.pow(dimA[i] - dimB[i], 2);
@@ -216,12 +216,14 @@ public class OutlierNodeDetect {
      * @author zouzhongfan
      */
     class DistComparator implements Comparator<DataNode> {
-        public int compare(DataNode A, DataNode B) {
-            if ((A.getDistance() - B.getDistance()) < 0)
+        public int compare(DataNode a, DataNode b) {
+            if ((a.getDistance() - b.getDistance()) < 0) {
                 return -1;
-            else if ((A.getDistance() - B.getDistance()) > 0)
+            } else if ((a.getDistance() - b.getDistance()) > 0) {
                 return 1;
-            else return 0;
+            } else {
+                return 0;
+            }
         }
     }
 
@@ -231,10 +233,10 @@ public class OutlierNodeDetect {
      * @author zouzhongfan
      */
     class LofComparator implements Comparator<DataNode> {
-        public int compare(DataNode A, DataNode B) {
-            if ((A.getLof() - B.getLof()) < 0) {
+        public int compare(DataNode a, DataNode b) {
+            if ((a.getLof() - b.getLof()) < 0) {
                 return 1;
-            } else if ((A.getLof() - B.getLof()) > 0) {
+            } else if ((a.getLof() - b.getLof()) > 0) {
                 return -1;
             } else {
                 return 0;
