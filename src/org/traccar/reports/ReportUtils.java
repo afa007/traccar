@@ -16,7 +16,6 @@
  */
 package org.traccar.reports;
 
-import javafx.geometry.Pos;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.traccar.Context;

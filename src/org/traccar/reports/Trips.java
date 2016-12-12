@@ -91,7 +91,8 @@ public final class Trips {
         return trip;
     }
 
-    private static Collection<TripReport> detectTripsByTimeDistance(long deviceId, Date from, Date to) throws SQLException {
+    private static Collection<TripReport> detectTripsByTimeDistance(long deviceId, Date from, Date to)
+            throws SQLException {
 
         ArrayList<Position> positions = new ArrayList<>(Context.getDataManager().getPositions(deviceId, from, to));
 

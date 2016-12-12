@@ -3,7 +3,6 @@ package org.traccar.mining;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -11,24 +10,28 @@ import java.util.List;
 
 public class OutlierNodeDetect {
 
-    private static int INT_K = 5;//正整数K
+    // 正整数K
+    private static int INT_K = 5;
 
-    // 1.找到给定点与其他点的欧几里得距离
-    // 2.对欧几里得距离进行排序，找到前5位的点，并同时记下k距离
-    // 3.计算每个点的可达密度
-    // 4.计算每个点的局部离群点因子
-    // 5.对每个点的局部离群点因子进行排序，输出。
-
+    /**
+     * 1.找到给定点与其他点的欧几里得距离
+     * 2.对欧几里得距离进行排序，找到前5位的点，并同时记下k距离
+     * 3.计算每个点的可达密度
+     * 4.计算每个点的局部离群点因子
+     * 5.对每个点的局部离群点因子进行排序，输出。
+     *
+     * @param allNodes
+     * @return
+     */
     public List<DataNode> getOutlierNode(List<DataNode> allNodes) {
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         List<DataNode> kdAndKnList = getKDAndKN(allNodes);
         calReachDis(kdAndKnList);
-//        System.out.println("A kdAndKnList:" + gson.toJson(kdAndKnList));
         calReachDensity(kdAndKnList);
-//        System.out.println("B kdAndKnList:" + gson.toJson(kdAndKnList));
         calLof(kdAndKnList);
         System.out.println("C kdAndKnList:" + gson.toJson(kdAndKnList));
+
         //降序排序
         Collections.sort(kdAndKnList, new LofComparator());
 
@@ -80,9 +83,9 @@ public class OutlierNodeDetect {
         for (DataNode node : kdAndKnList) {
             List<DataNode> tempNodes = node.getkNeighbor();
             for (DataNode tempNode : tempNodes) {
-                //获取tempNode点的k-距离
+
+                // 获取tempNode点的k-距离
                 double kDis = getKDis(tempNode.getNodeName(), kdAndKnList);
-                //reachdis(p,o)=max{ k-distance(o),d(p,o)}
                 if (kDis < tempNode.getDistance()) {
                     tempNode.setReachDis(tempNode.getDistance());
                 } else {
@@ -131,7 +134,8 @@ public class OutlierNodeDetect {
     }
 
     /**
-     * 计算给定点NodeA与其他点NodeB的欧几里得距离（distance）,并找到NodeA点的前5位NodeB，然后记录到NodeA的k-领域（kNeighbor）变量。
+     * 计算给定点NodeA与其他点NodeB的欧几里得距离（distance）,并找到NodeA点的前5位NodeB，
+     * 然后记录到NodeA的k-领域（kNeighbor）变量。
      * 同时找到NodeA的k距离，然后记录到NodeA的k-距离（kDistance）变量中。
      * 处理步骤如下：
      * 1,计算给定点NodeA与其他点NodeB的欧几里得距离，并记录在NodeB点的distance变量中。
@@ -148,11 +152,12 @@ public class OutlierNodeDetect {
             List<DataNode> tempNodeList = new ArrayList<DataNode>();
             DataNode nodeA = new DataNode(allNodes.get(i).getNodeName(), allNodes
                     .get(i).getDimensioin());
-            //1,找到给定点NodeA与其他点NodeB的欧几里得距离，并记录在NodeB点的distance变量中。
+            // 1,找到给定点NodeA与其他点NodeB的欧几里得距离，并记录在NodeB点的distance变量中。
             for (int j = 0; j < allNodes.size(); j++) {
                 DataNode nodeB = new DataNode(allNodes.get(j).getNodeName(), allNodes
                         .get(j).getDimensioin());
-                //计算NodeA与NodeB的欧几里得距离(distance)
+
+                // 计算NodeA与NodeB的欧几里得距离(distance)
                 double tempDis = getDis(nodeA, nodeB);
                 if (tempDis == 0.0) {
                     continue;
@@ -161,13 +166,15 @@ public class OutlierNodeDetect {
                 tempNodeList.add(nodeB);
             }
 
-            //2,对所有NodeB点中的欧几里得距离（distance）进行升序排序。
+            // 2,对所有NodeB点中的欧几里得距离（distance）进行升序排序
             Collections.sort(tempNodeList, new DistComparator());
             for (int k = 1; k < INT_K; k++) {
-                //3,找到NodeB点的前5位的欧几里得距离点，并记录到到NodeA的kNeighbor变量中。
+
+                // 3,找到NodeB点的前5位的欧几里得距离点，并记录到到NodeA的kNeighbor变量中。
                 nodeA.getkNeighbor().add(tempNodeList.get(k));
                 if (k == INT_K - 1) {
-                    //4,找到NodeB点的第5位距离，并记录到NodeA点的kDistance变量中。
+
+                    // 4,找到NodeB点的第5位距离，并记录到NodeA点的kDistance变量中。
                     nodeA.setkDistance(tempNodeList.get(k).getDistance());
                 }
             }
@@ -210,8 +217,6 @@ public class OutlierNodeDetect {
      */
     class DistComparator implements Comparator<DataNode> {
         public int compare(DataNode A, DataNode B) {
-//            return new BigDecimal(A.getDistance()).compareTo(new BigDecimal(B.getDistance()));
-            //return A.getDistance() - B.getDistance() < 0 ? -1 : 1;
             if ((A.getDistance() - B.getDistance()) < 0)
                 return -1;
             else if ((A.getDistance() - B.getDistance()) > 0)
@@ -227,9 +232,6 @@ public class OutlierNodeDetect {
      */
     class LofComparator implements Comparator<DataNode> {
         public int compare(DataNode A, DataNode B) {
-//            System.out.println("A:" + A.getLof() + ", B:" + B.getLof());
-//            return new BigDecimal(B.getLof()).compareTo(new BigDecimal(A.getLof()));
-            //return A.getLof() - B.getLof() < 0 ? 1 : -1;
             if ((A.getLof() - B.getLof()) < 0) {
                 return 1;
             } else if ((A.getLof() - B.getLof()) > 0) {
@@ -277,7 +279,8 @@ public class OutlierNodeDetect {
         double[] j = {7, 6};
         double[] k = {8, 5};
 
-        double[] l = {100, 2};// 孤立点
+        // 孤立点
+        double[] l = {100, 2};
 
         double[] m = {8, 20};
         double[] n = {8, 19};

@@ -5,21 +5,29 @@ import java.util.List;
 
 public class DataNode {
 
-    private String nodeName; // 样本点名
+    // 样本点名
+    private String nodeName;
 
-    private double[] dimensioin; // 样本点的维度
+    // 样本点的维度
+    private double[] dimensioin;
 
-    private double kDistance; // k-距离
+    // k-距离
+    private double kDistance;
 
-    private List<DataNode> kNeighbor = new ArrayList<DataNode>();// k-领域
+    // k-领域
+    private List<DataNode> kNeighbor = new ArrayList<DataNode>();
 
-    private double distance; // 到给定点的欧几里得距离
+    // 到给定点的欧几里得距离
+    private double distance;
 
-    private double reachDensity;// 可达密度
+    // 可达密度
+    private double reachDensity;
 
-    private double reachDis;// 可达距离
+    // 可达距离
+    private double reachDis;
 
-    private double lof;// 局部离群因子
+    // 局部离群因子
+    private double lof;
 
     public DataNode() {
 
