@@ -255,7 +255,8 @@ public final class Trips {
         ArrayList<TripReport> result = new ArrayList<>();
         for (long deviceId : ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-//            result.addAll(detectTrips(deviceId, from, to));
+
+            System.out.println("userId:" + userId + ", deviceId:" + deviceId + ", from:" + from + ", to:" + to);
             result.addAll(detectTripsByTimeDistance(deviceId, from, to));
         }
         return result;
