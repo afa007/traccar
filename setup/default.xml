@@ -19,7 +19,7 @@
 
     <entry key='event.enable'>true</entry>
     <entry key='event.overspeedHandler'>true</entry>
-    <entry key='event.overspeed.notRepeat'>tprue</entry>
+    <entry key='event.overspeed.notRepeat'>true</entry>
     <entry key='event.motionHandler'>true</entry>
     <entry key='event.geofenceHandler'>true</entry>
     <entry key='event.alertHandler'>true</entry>
